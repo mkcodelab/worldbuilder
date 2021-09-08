@@ -1,0 +1,21 @@
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  background: #333;
+}
+.large-map {
+  
+  // border-top: .5rem solid #888;
+  // border-left: .5rem solid #777;
+  // border-bottom: .5rem solid #222;
+  // border-right: .5rem solid #444;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
