@@ -23,6 +23,7 @@ let currentTile = {
   x: null,
   y: null,
   color: null,
+  localMap: [],
 };
 
 const lgMapTileArray = [];
@@ -44,18 +45,23 @@ class Tile {
     this.biome = biome;
     // array of local tiles
     this.localMap = [];
-
+    this.hasLocalMap = true;
+    this.createLocalTerrain()
   }
   draw() {
     ctx.fillStyle = this.biome.lgMapColor;
     ctx.fillRect(this.x, this.y, this.w, this.h);
   }
   // function for creating local map
-  createLocalTerrain(biome) {
-    this.localMap = [];
-    for (let i = 0; i < 32; i++) {
-      this.localMap.push( new LocalTerrainTile(x, y, biome))
+  createLocalTerrain() {
+    if (this.hasLocalMap) {
+      for (let i = 0; i < 32; i++) {
+        for (let j = 0; j < 32; j++) {
+          this.localMap.push( new LocalTerrainTile(i * localTileSize, j * localTileSize, this.biome))
+        }
+      }
     }
+    
   }
 }
 
@@ -65,9 +71,14 @@ class LocalTerrainTile {
     this.h = localTileSize;
     this.x = x;
     this.y = y;
-    
     this.biome = biome;
-    
+    // randomized color based on biome
+    this.color = this.biome.localMapColors[Math.floor(Math.random() * this.biome.localMapColors.length)];
+  }
+  draw() {
+   
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, this.w, this.h);
   }
 }
 
@@ -178,7 +189,6 @@ function zoomIn(e) {
 
   // finding the object by x and y coords
   
-  // console.log('current tile is: ', currentTile);
 
   for (let i = 0; i < array.length; i++) {
     let crdX = array[i].crdX;
@@ -186,12 +196,14 @@ function zoomIn(e) {
  
     if (crdX == currentTile.x && crdY == currentTile.y) {
       console.log('%c Entering choosen tile...', 'background: black; color: red;')
-      // console.log(array[i].biome.lgMapColor);
+      console.log('biome: ', array[i].biome);
+      // console.log(array[i].localMap[0])
       currentTile.color = array[i].biome.lgMapColor;
+      currentTile.localMap = array[i].localMap;
     }
   
   }
-
+  console.log(currentTile)
   isLgMap = false;
   isLocalMap = true;
 }
@@ -216,31 +228,25 @@ function drawLgMap() {
 
 // DRAWING LOCAL MAP FUNCTION
 
-function drawLocalMap(coordX, coordY) {
+function drawLocalMap(coordX, coordY, localMap) {
   // coords passed from dblclick event
  
   let array = lgMapTileArray;
   let tile = null;
+  
   // debug mode log
   if (showDrawingMap) console.log('drawing LOCAL map');
 
-
-  // OGARNIJ TUTAJ TE KOORDYNATY DO MALOWANIA KONKRETNEJ LOKALNEJ MAPY
-
   // drawing map from tile[x, y]
-
-  // search for tile in largeTileArray by x and y coords
-
-  // for (let i = 0; i < array.length; i++) {
-  //   if (array[i].crdX == coordX && array[i].crdY == coordY){
-  //     tile = array[i];
-  //   } else tile = null;
-  // }
+  let currentlocalMap = currentTile.localMap
+  for (tile of currentlocalMap) {
+    tile.draw();
+  }
 
   // temporary drawing square 
   // add color from current tile
-  ctx.fillStyle = currentTile.color;
-  ctx.fillRect(0, 0, largeMap.width, largeMap.height)
+  // ctx.fillStyle = currentTile.color;
+  // ctx.fillRect(0, 0, largeMap.width, largeMap.height)
 }
 
 
@@ -257,7 +263,8 @@ function loop() {
   //drawing local map, checks for global boolean 'isLocalMap' active or not
   if (isLocalMap) {
     // passing coordinates from currentTile; currentTile has coords from click event
-    drawLocalMap(currentTile.x, currentTile.y);
+
+    drawLocalMap(currentTile.x, currentTile.y, currentTile.localMap);
   }
   requestAnimationFrame(loop);
 }
