@@ -264,6 +264,7 @@ addEventListener('keydown', e=> {
 // zooming in and out
 // enlarging map function after doubleclick 
 function zoomIn(e) {
+
   console.log('%c map zoomed in...🔍', 'background: #000; color: limegreen;')
   let map = largeMap.getBoundingClientRect();
   // console.log(map.x, map.y);
@@ -281,6 +282,7 @@ function zoomIn(e) {
   
 
   for (let i = 0; i < array.length; i++) {
+    // coordinate x, y temp variables from lgMapTileArray
     let crdX = array[i].crdX;
     let crdY = array[i].crdY;
  
@@ -335,9 +337,22 @@ function drawLocalMap(coordX, coordY, localMap) {
   }
 
 }
+// drawing currentTile
+function drawCurrentCellFrame() {
+  if (currentTile != []) {
+    let x = currentTile.x * 10;
+    let y = currentTile.y * 10;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255,0,255,.5)';
+    ctx.strokeRect(x, y, 10, 10);
+  }
+ 
+}
 
 
 // todo change largeMap const name to Map
+// add some sprites to the local map tiles
+// example : darker tiles can have some obstacles, trees, rocks, buildings etc
 
 // LOOP FUNCTION ========================================================
 function loop() {
@@ -345,6 +360,7 @@ function loop() {
   //drawing large map, checks for global boolean 'isLgMap' active or not
   if (isLgMap){
     drawLgMap();
+    drawCurrentCellFrame();
   }
   //drawing local map, checks for global boolean 'isLocalMap' active or not
   if (isLocalMap) {
