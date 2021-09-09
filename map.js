@@ -1,3 +1,12 @@
+/*
+  Worldbuilder ================
+  DESKTOP ONLY!
+  64x64 cell map,
+  inside each cell 32x32 local map.
+*/
+const treeImg = new Image();
+treeImg.src = 'img/tree.png';
+
 const largeMap = document.querySelector('#largeMap');
 const ctx = largeMap.getContext('2d');
 //GLOBALS =====================================
@@ -9,10 +18,13 @@ const localW = 32;
 const localH = 32;
 const localTileSize = 20;
 
+
+
 //DEBUGGING OPTIONS ============================
 // DEBUG OPTION FOR LOCAL AND LARGE MAP
-const showDrawingMap = false;
-const showMouseClicks = false;
+let showDrawingMap = false;
+let showMouseClicks = false;
+let showCoordinates = true;
 
 // ==============================================
 largeMap.width = W*tileSize;
@@ -72,6 +84,7 @@ class LocalTerrainTile {
     this.x = x;
     this.y = y;
     this.biome = biome;
+    
     // randomized color based on biome
     this.color = this.biome.localMapColors[Math.floor(Math.random() * this.biome.localMapColors.length)];
   }
@@ -81,29 +94,81 @@ class LocalTerrainTile {
     ctx.fillRect(this.x, this.y, this.w, this.h);
   }
 }
+// BIOMES ================================================
 
 // large map color for the representation of the tile on large map and pallete of colors of local map
 const biomeArray = 
 [
-  {name: 'plains', lgMapColor: 'hsl(72, 48%, 34%)', localMapColors: ['hsl(72, 40%, 34%)', 'hsl(72, 48%, 34%)', 'hsl(72, 50%, 34%)', 'hsl(72, 55%, 34%)']},
-  {name: 'river', lgMapColor: 'hsl(176, 48%, 34%)', localMapColors: ['hsl(176, 40%, 34%)', 'hsl(176, 48%, 34%)', 'hsl(176, 50%, 34%)', 'hsl(176, 55%, 34%)']},
-  {name: 'forest', lgMapColor: 'hsl(105, 54%, 24%)', localMapColors: ['hsl(105, 40%, 34%)', 'hsl(105, 48%, 34%)', 'hsl(105, 50%, 34%)', 'hsl(105, 55%, 34%)']},
-  {name: 'desert', lgMapColor: 'hsl(42, 54%, 63%)', localMapColors: ['hsl(42, 40%, 34%)', 'hsl(42, 48%, 34%)', 'hsl(42, 50%, 34%)', 'hsl(42, 55%, 34%)']},
-  {name: 'rocks', lgMapColor: 'hsl(37, 12%, 57%)', localMapColors: ['hsl(37, 40%, 34%)', 'hsl(37, 48%, 34%)', 'hsl(37, 50%, 34%)', 'hsl(37, 55%, 34%)']},
+  {
+    name: 'plains', lgMapColor: 'hsl(72, 48%, 34%)', localMapColors: [
+      'hsl(72, 40%, 34%)',
+      'hsl(72, 48%, 34%)',
+      'hsl(72, 50%, 34%)',
+      'hsl(72, 55%, 35%)'
+    ]
+  },
+  {
+    name: 'forest', lgMapColor: 'hsl(105, 54%, 24%)', localMapColors: [
+      'hsl(105, 40%, 34%)',
+      'hsl(105, 48%, 34%)',
+      'hsl(105, 50%, 34%)',
+      'hsl(105, 55%, 34%)'
+    ]
+  },
+  {
+    name: 'rocks', lgMapColor: 'hsl(37, 12%, 57%)', localMapColors: [
+    'hsl(37, 20%, 34%)', 
+    'hsl(37, 20%, 40%)', 
+    'hsl(37, 20%, 55%)', 
+    'hsl(37, 20%, 65%)'
+    ]
+  },
+  {
+    name: 'desert', lgMapColor: 'hsl(42, 54%, 63%)', localMapColors: [
+    'hsl(42, 40%, 60%)', 
+    'hsl(42, 48%, 67%)',
+    'hsl(42, 50%, 75%)',
+    'hsl(44, 56%, 80%)'
+    ]
+  },
+  {
+    name: 'river', lgMapColor: 'hsl(176, 48%, 34%)', localMapColors: [
+      'hsl(176, 40%, 34%)',
+      'hsl(176, 48%, 34%)',
+      'hsl(176, 50%, 34%)',
+      'hsl(176, 55%, 34%)'
+    ]
+  },
 ];
 
 // WORLD GENERATION =====================
 
 function createWorld() {
   lgMapTileArray.length = 0;
-  for (let i = 0; i < W; i++) {
-    for (let j = 0; j < H; j++) {
-      // add some logic to biome randomization
-      let biome = biomeArray[Math.floor(Math.random()*biomeArray.length)];
-      lgMapTileArray.push( new Tile(i * tileSize, j * tileSize, i, j , biome))
+  for (let x = 0; x < W; x++) {
+    for (let y = 0; y < H; y++) {
+      // ADD SOME LOGIC TO BIOME RANDOMIZATION
+      let biomeIndex = 0;
+      let randNum = Math.floor(Math.random() * 100);
+      // plains
+      if (randNum < 40) biomeIndex = 0;
+      // forests
+      if (randNum > 40 && randNum < 60) biomeIndex = 1;
+      // rocks
+      if (randNum > 60 && randNum < 70) biomeIndex = 2;
+      // desert
+      if (randNum > 70 && randNum < 90) biomeIndex = 3;
+      // river
+      if (randNum > 95) biomeIndex = 4;
+      // tinker some way to accumulate simillar biomes together
+
+      // let biome = biomeArray[Math.floor(Math.random()*biomeArray.length)];
+      let biome = biomeArray[biomeIndex];
+      lgMapTileArray.push( new Tile(x * tileSize, y * tileSize, x, y , biome))
       // add randomized local map generation iside the tile
     }
   }
+  console.log(`Dimension of the World: Width: ${W * localW}, Height: ${H * localH} |number of large cells: ${W * H} | number of total local cells: ${(W * H) * (localW * localH)}`)
 }
 createWorld();
 
@@ -113,6 +178,8 @@ createWorld();
 const mouse = {
   x: null,
   y: null,
+  size: 3,
+  cursorColor: 'white',
   lmbPressed: false,
   rmbPressed: false,
 
@@ -125,15 +192,23 @@ addEventListener('mousemove', e=>{
   mouse.y = e.x;
 });
 
-largeMap.addEventListener('click', ()=> {
-  if(showMouseClicks) showMouse();
+largeMap.addEventListener('click', e=> {
+  if (showMouseClicks) showMouse();
+  if (showCoordinates) showCoords(e);
 });
   // debug option, showing mouse coords on canvas
 function showMouse() {
   console.log('mouse x : ' +mouse.x)
   console.log('mouse y : ' +mouse.y)
 }
-
+function showCoords(e) {
+  let map = largeMap.getBoundingClientRect();
+  let calcX = Math.floor((e.clientX - map.left) / 10)
+  let calcY = Math.floor((e.clientY - map.top) / 10)
+  // debug option showing clicked tile coords
+  if (isLgMap) console.log(`%c tile X: ${calcX}, tile Y: ${calcY}`, 'background: #black; color: goldenrod;')
+  
+}
 // add zoom out function
 addEventListener('contextmenu', e => e.preventDefault());
 addEventListener('mousedown', e => {
@@ -166,6 +241,21 @@ largeMap.addEventListener('dblclick', e=> {
   zoomIn(e)
 });
 
+// KEYBOARD EVENTS ==================
+// arrows to move between local maps
+addEventListener('keydown', e=> {
+  if (isLocalMap) {
+    
+    if (e.key === 'ArrowLeft') console.log('Going West')
+
+    if (e.key === 'ArrowUp') console.log('Going North')
+
+    if (e.key === 'ArrowRight') console.log('Going East')
+
+    if (e.key === 'ArrowDown') console.log('Going South')
+
+  }
+})
 
 
 // MAP DRAWING FUNCTIONS ===============================================
@@ -195,8 +285,9 @@ function zoomIn(e) {
     let crdY = array[i].crdY;
  
     if (crdX == currentTile.x && crdY == currentTile.y) {
-      console.log('%c Entering choosen tile...', 'background: black; color: red;')
-      console.log('biome: ', array[i].biome);
+      console.log('%c Entering choosen tile...', 'background: black; color: goldenrod;')
+      // console.log('biome: ', array[i].biome);
+      console.log(`%c biome:  ${array[i].biome.name}`, 'background: #888; color: white;');
       // console.log(array[i].localMap[0])
       currentTile.color = array[i].biome.lgMapColor;
       currentTile.localMap = array[i].localMap;
@@ -243,15 +334,10 @@ function drawLocalMap(coordX, coordY, localMap) {
     tile.draw();
   }
 
-  // temporary drawing square 
-  // add color from current tile
-  // ctx.fillStyle = currentTile.color;
-  // ctx.fillRect(0, 0, largeMap.width, largeMap.height)
 }
 
 
 // todo change largeMap const name to Map
-
 
 // LOOP FUNCTION ========================================================
 function loop() {
@@ -266,6 +352,7 @@ function loop() {
 
     drawLocalMap(currentTile.x, currentTile.y, currentTile.localMap);
   }
+  // drawCursor();
   requestAnimationFrame(loop);
 }
 loop();
