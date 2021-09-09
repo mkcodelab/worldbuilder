@@ -40,7 +40,7 @@ class Tile {
     this.y = y;
     // coordinate x and y 0 - 63
     this.crdX = crdX;
-    this.crdy = crdY;
+    this.crdY = crdY;
     this.biome = biome;
     // array of local tiles
     this.localMap = [];
@@ -149,7 +149,7 @@ addEventListener('mouseup', e => {
 })
 
 
-// dbl click on canvas function, firing up enlargeMap, that draws Local Map
+// dbl click on canvas function, firing up zoom in, that draws Local Map
 largeMap.addEventListener('dblclick', e=> {
   
   zoomIn(e)
@@ -166,13 +166,32 @@ function zoomIn(e) {
   console.log('%c map zoomed in...🔍', 'background: #000; color: limegreen;')
   let map = largeMap.getBoundingClientRect();
   // console.log(map.x, map.y);
-  // calculated coordinates of tile
+  // calculated coordinates of clicked tile
   let calcX = Math.floor((e.clientX - map.left) / 10)
   let calcY = Math.floor((e.clientY - map.top) / 10)
-  console.log(calcX, calcY);
+  // console.log(calcX, calcY);
+
   currentTile.x = calcX;
   currentTile.y = calcY;
-  console.log('current tile is: ', currentTile);
+  
+  let array = lgMapTileArray;
+
+  // finding the object by x and y coords
+  
+  // console.log('current tile is: ', currentTile);
+
+  for (let i = 0; i < array.length; i++) {
+    let crdX = array[i].crdX;
+    let crdY = array[i].crdY;
+ 
+    if (crdX == currentTile.x && crdY == currentTile.y) {
+      console.log('%c Entering choosen tile...', 'background: black; color: red;')
+      // console.log(array[i].biome.lgMapColor);
+      currentTile.color = array[i].biome.lgMapColor;
+    }
+  
+  }
+
   isLgMap = false;
   isLocalMap = true;
 }
@@ -199,8 +218,9 @@ function drawLgMap() {
 
 function drawLocalMap(coordX, coordY) {
   // coords passed from dblclick event
-  let x = coordX;
-  let y = coordY;
+ 
+  let array = lgMapTileArray;
+  let tile = null;
   // debug mode log
   if (showDrawingMap) console.log('drawing LOCAL map');
 
@@ -210,6 +230,12 @@ function drawLocalMap(coordX, coordY) {
   // drawing map from tile[x, y]
 
   // search for tile in largeTileArray by x and y coords
+
+  // for (let i = 0; i < array.length; i++) {
+  //   if (array[i].crdX == coordX && array[i].crdY == coordY){
+  //     tile = array[i];
+  //   } else tile = null;
+  // }
 
   // temporary drawing square 
   // add color from current tile
