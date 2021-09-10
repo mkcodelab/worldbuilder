@@ -7,6 +7,9 @@
 const treeImg = new Image();
 treeImg.src = 'img/tree.png';
 
+const grassImg = new Image();
+grassImg.src = 'img/grass.png';
+
 const largeMap = document.querySelector('#largeMap');
 const ctx = largeMap.getContext('2d');
 //GLOBALS =====================================
@@ -84,14 +87,32 @@ class LocalTerrainTile {
     this.x = x;
     this.y = y;
     this.biome = biome;
-    
+    this.structure = [];
     // randomized color based on biome
     this.color = this.biome.localMapColors[Math.floor(Math.random() * this.biome.localMapColors.length)];
+    this.createStructures();
   }
   draw() {
    
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, this.w, this.h);
+
+    if (this.structure[0] === 'tree') {
+      ctx.drawImage(treeImg, this.x, this.y, this.w, this.h);
+    }
+    if (this.structure[0] === 'grass') {
+      ctx.drawImage(grassImg, this.x, this.y, this.w, this.h)
+    }
+  }
+  createStructures() {
+    // add some more structures and generator logic
+    let hasTree = Math.round(Math.random());
+    let hasGrass = Math.round(Math.random());
+    if(this.biome.name === 'forest' && hasTree == 1) {
+      this.structure.push('tree');
+    } else if (this.biome.name === 'plains' && hasGrass == 1) {
+      this.structure.push('grass')
+    }
   }
 }
 // BIOMES ================================================
